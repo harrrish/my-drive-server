@@ -42,6 +42,13 @@ app.use("/directory", checkAuth, directoryRouter);
 app.use("/auth", authRouter);
 
 app.get("/test", (req, res) => {
+  res.cookie("sessionID", sessionID, {
+    httpOnly: true,
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    secure: process.env.NODE_ENV === "production",
+    signed: true,
+    maxAge: 60 * 60 * 1000,
+  });
   return res.send("Hello");
 });
 

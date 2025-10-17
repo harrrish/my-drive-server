@@ -7,6 +7,7 @@ import {
   customErr,
   customResp,
   emailDuplicate,
+  INS,
   invalidCreds,
   invalidOTP,
   userLoginSuccess,
@@ -153,7 +154,7 @@ export const loginUser = async (req, res) => {
       maxAge: 60 * 60 * 1000,
     });
 
-    try {
+    /*     try {
       const redisKey = `user:${user._id}`;
       await redisClient.json.set(redisKey, "$", {
         name: user.name,
@@ -162,9 +163,9 @@ export const loginUser = async (req, res) => {
       });
       await redisClient.expire(redisKey, 60 * 60);
     } catch (error) {
-      console.log(`Error_57:${error}`);
+      console.log(`Error_76:${error}`);
       return customErr(res, 500, INS);
-    }
+    } */
 
     return customResp(res, 200, userLoginSuccess);
   } catch (error) {

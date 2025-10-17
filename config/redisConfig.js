@@ -1,14 +1,10 @@
 import { createClient } from "redis";
 
-export const redisClient = async () => {
-  const redisClient = await createClient({
-    url: process.env.REDIS_URL,
-  })
-    .on("error", (err) => console.log("Redis Connection Error:", err))
-    .on("connect", () => console.log("Redis Connection Success"))
-    .connect();
+const client = createClient({ url: process.env.REDIS_URL });
 
-  return redisClient;
-};
+client.on("error", (err) => console.log("Redis Connection Error:", err));
+client.on("connect", () => console.log("Redis Connection Success"));
 
-redisClient();
+await client.connect();
+
+export { client as redisClient };

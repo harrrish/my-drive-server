@@ -8,6 +8,7 @@ import {
   customErr,
   customResp,
   emailDuplicate,
+  INS,
   invalidEmail,
   invalidOTP,
   missingCreds,

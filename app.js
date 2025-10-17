@@ -41,6 +41,10 @@ app.use("/directory", checkAuth, directoryRouter);
 //* AUTH
 app.use("/auth", authRouter);
 
+app.get("/test", (req, res) => {
+  return res.send("Hello");
+});
+
 app.listen(process.env.PORT, () =>
   console.log(`Express app running on PORT:${process.env.PORT} `)
 );

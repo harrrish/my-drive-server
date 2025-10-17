@@ -149,7 +149,7 @@ export const loginUser = async (req, res) => {
     res.cookie("sessionID", sessionID, {
       httpOnly: true,
       sameSite: "none",
-      secure: true, // false for development
+      secure: process.env.NODE_ENV === "production", // false for development
       signed: true,
       maxAge: 60 * 60 * 1000,
     });

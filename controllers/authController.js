@@ -123,9 +123,9 @@ export const loginWithGoogle = async (req, res) => {
         //* SENDING COOKIE
         res.cookie("sessionID", sessionID, {
           httpOnly: true,
-          sameSite: "Lax",
+          sameSite: "none",
+          secure: true, // false for development
           signed: true,
-          secure: true,
           maxAge: 60 * 60 * 1000,
         });
         mongooseSession.commitTransaction();

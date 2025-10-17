@@ -148,8 +148,8 @@ export const loginUser = async (req, res) => {
     //* SENDING COOKIE
     res.cookie("sessionID", sessionID, {
       httpOnly: true,
-      sameSite: "none",
-      secure: process.env.NODE_ENV === "production", // false for development
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: process.env.NODE_ENV === "production",
       signed: true,
       maxAge: 60 * 60 * 1000,
     });

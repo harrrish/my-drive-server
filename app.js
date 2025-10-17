@@ -19,7 +19,7 @@ const app = express();
 // //* CORS
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "https://my-drive-client.onrender.com",
     credentials: true,
   })
 );

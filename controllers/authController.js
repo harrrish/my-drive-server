@@ -9,19 +9,19 @@ import { redisClient } from "../config/redisConfig.js";
 import { customErr, customResp } from "../utils/customReturn.js";
 
 export const requestOTP = async (req, res) => {
-  try {
-    const { success, data, error } = otpRequestSchema.safeParse(req.body);
-    if (!success) return customErr(res, 400, error.issues[0].message);
+  const { success, data, error } = otpRequestSchema.safeParse(req.body);
+  if (!success) return customErr(res, 400, error.issues[0].message);
 
-    const { email } = data;
-    const emailExists = await UserModel.findOne({ email });
-    if (emailExists) return customErr(res, 400, emailDuplicate);
+  const { email } = data;
+  const emailExists = await UserModel.findOne({ email });
+  if (emailExists) return customErr(res, 400, emailDuplicate);
 
-    const otpSent = await sendOTP(data.email);
-    if (otpSent.success) {
-      return customResp(res, 201, `OTP sent to ${data.email} !`);
-    } else {
-      return customErr(res, 500, otpSent.error);
+  const otpSent = await sendOTP(data.email);
+  if (otpSent.success) {
+    return customResp(res, 201, `OTP sent to ${data.email} !`);
+  } else {
+    return customErr(res, 500, otpSent.error);
+  }
 };
 
 export const verifyOTP = async (req, res) => {

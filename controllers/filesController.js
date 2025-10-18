@@ -42,8 +42,8 @@ export const uploadInitiate = async (req, res) => {
 
     return res.status(200).json({ uploadSignedUrl, fileID: insertedFile.id });
   } catch (error) {
-    console.error("File upload failed:", error);
-    const errStr = "Internal Server Error: File upload failed";
+    console.error("Failed to start file upload:", error);
+    const errStr = "Internal Server Error: Failed to start file upload";
     return customErr(res, 500, errStr);
   }
 };
@@ -55,7 +55,7 @@ export const uploadComplete = async (req, res) => {
     const { fileID, size } = req.body;
     if (!fileID || !size) {
       res.clearCookie("sessionID");
-      return customErr(res, 400, "Invalid file upload");
+      return customErr(res, 400, "Invalid file ID");
     }
     if (fileID) validateMongoID(res, fileID);
 

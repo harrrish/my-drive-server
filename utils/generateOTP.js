@@ -26,14 +26,15 @@ export async function sendOTP(email) {
     });
 
     const info = await transporter.sendMail({
-      from: `Harish S <haridir150@gmail.com>`,
+      from: `My Drive`,
       to: `${email}`,
       subject: "OTP Verification",
       html,
     });
     // console.log("OTP sent: %s", info.messageId);
-    return true;
+    return { success: true };
   } catch (error) {
-    throw new Error("Unable to generate");
+    console.log(`OTP generation failed:${error}`);
+    return { success: false, error: "OTP generation failed" };
   }
 }

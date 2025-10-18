@@ -18,16 +18,10 @@ export const requestOTP = async (req, res) => {
     if (emailExists) return customErr(res, 400, emailDuplicate);
 
     const otpSent = await sendOTP(data.email);
-    if (otpSent) {
+    if (otpSent.success) {
       return customResp(res, 201, `OTP sent to ${data.email} !`);
     } else {
-      return customErr(res, 500, "Unable to generate");
-    }
-  } catch (error) {
-    console.error("OTP request failed:", error);
-    const errStr = "Internal Server Error: OTP request failed";
-    return customErr(res, 500, errStr);
-  }
+      return customErr(res, 500, otpSent.error);
 };
 
 export const verifyOTP = async (req, res) => {

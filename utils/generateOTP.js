@@ -1,8 +1,9 @@
 import OTP from "../models/OTPModel.js";
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function sendOTP(email) {
-  console.log(email);
   try {
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
 
@@ -17,31 +18,20 @@ export async function sendOTP(email) {
                     <p>PS: OTP is valid for 3 minutes !</p>
                 </div>`;
 
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 587,
-      secure: false,
-      auth: {
-        user: "harrrish19aws@gmail.com",
-        pass: process.env.GOOGLE_AUTH_PASSWORD,
-      },
-      tls: {
-        rejectUnauthorized: false,
-      },
-    });
-
-    // console.log(transporter);
-
-    // console.log("Preparing to send OTP email...");
-    const info = await transporter.sendMail({
-      from: "My Drive <harrrish19aws@gmail.com>",
+    const { data, error } = await resend.emails.send({
+      from: "My Drive <onboarding@resend.dev>",
       to: email,
-      subject: "OTP Verification",
+      subject: "My Drive OTP Verification",
       html,
     });
-    // console.log("Email sent successfully:", info.messageId);
 
-    return { success: true };
+    console.log(data, error);
+
+    if (data.id) {
+      return { success: true };
+    } else {
+      return { success: false, error: "Resend failed to generate OTP" };
+    }
   } catch (error) {
     console.log(`OTP generation failed:${error}`);
     return { success: false, error: "OTP generation failed" };

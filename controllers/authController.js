@@ -46,9 +46,6 @@ export const loginWithGoogle = async (req, res) => {
   try {
     const { idToken } = req.body;
     const userData = await verifyToken(idToken);
-    if (!userData?.success) {
-      return customErr(res, 401, userData?.error || "Invalid Google token");
-    }
     const { name, picture, email, sub } = userData;
     const user = await UserModel.findOne({ email }).select("-__v").lean();
 

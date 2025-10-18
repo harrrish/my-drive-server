@@ -20,8 +20,8 @@ export const requestOTP = async (req, res) => {
     await sendOTP(data.email);
     return customResp(res, 201, `OTP sent to ${data.email} !`);
   } catch (error) {
-    console.error("OTP request failure:", error);
-    const errStr = "Internal Server Error: OTP request failure";
+    console.error("OTP request failed:", error);
+    const errStr = "Internal Server Error: OTP request failed";
     return customErr(res, 500, errStr);
   }
 };
@@ -36,8 +36,8 @@ export const verifyOTP = async (req, res) => {
     if (!otpRecord) return customErr(res, 400, invalidOTP);
     else return customResp(res, 200, "OTP verification completed");
   } catch (error) {
-    console.error("OTP verification failure:", error);
-    const errStr = "Internal Server Error: OTP verification failure";
+    console.error("OTP verification failed:", error);
+    const errStr = "Internal Server Error: OTP verification failed";
     return customErr(res, 500, errStr);
   }
 };

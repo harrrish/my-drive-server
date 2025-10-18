@@ -7,12 +7,12 @@ export const customResp = (res, status, value) => {
 };
 
 /* 
-return customErr(res, 400, "Invalid Credentials !");
-return customResp(res, 200, "User logged in !");
+return customErr(res, 400, "Invalid Credentials");
+return customResp(res, 200, "User logged in");
 */
 
 /* 
-    console.error("OTP generation failure:", error);
-    const errStr = "Internal Server Error: OTP generation failure";
+    console.error("OTP generation failed:", error);
+    const errStr = "Internal Server Error: OTP generation failed";
     return customErr(res, 500, errStr);
 */

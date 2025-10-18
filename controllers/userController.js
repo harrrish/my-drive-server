@@ -48,8 +48,8 @@ export const registerUser = async (req, res) => {
     session.commitTransaction();
     return customResp(res, 201, "User registration complete");
   } catch (error) {
-    console.error("User registration failure:", error);
-    const errStr = "Internal Server Error: User registration failure";
+    console.error("User registration failed:", error);
+    const errStr = "Internal Server Error: User registration failed";
     return customErr(res, 500, errStr);
   }
 };
@@ -57,43 +57,24 @@ export const registerUser = async (req, res) => {
 //*===============>  USER LOGIN
 export const loginUser = async (req, res) => {
   try {
-    //*===============>  ZOD VALIDATION
     const { success, data, error } = loginSchema.safeParse(req.body);
-    if (!success) {
-      console.log({ zodError: error.issues[0].message });
-      return customErr(res, 400, invalidCreds);
-    }
+    if (!success) return customErr(res, 400, "Invalid Credentials");
+
     const { email, password } = data;
 
-    //*===============>  VERIFYING USER CREDENTIALS
-    let user;
-    try {
-      user = await UserModel.findOne({ email });
-    } catch (error) {
-      console.log(`Error_55:${error}`);
-      return customErr(res, 500, INS);
-    }
-    if (!user) return customErr(res, 400, invalidCreds);
+    const user = await UserModel.findOne({ email });
+    if (!user) return customErr(res, 400, "Invalid Credentials");
 
-    //*===============>  PASSWORD VERIFICATION
     const isPasswordValid = await user.comparePassword(password);
-    if (!isPasswordValid) return customErr(res, 400, invalidCreds);
-
-    /* //*===============>  CHECKING USER's PREVIOUS SESSION
-    let allSessions;
-    if (allSessions.length >= 2) {
-      await allSessions[0].deleteOne();
-    } */
+    if (!isPasswordValid) return customErr(res, 400, "Invalid Credentials");
 
     const sessionID = new Types.ObjectId();
-    //*===============>  SESSION CREATION
     const redisKey = `session:${sessionID}`;
     await redisClient.json.set(redisKey, "$", {
       userID: user._id,
     });
     await redisClient.expire(redisKey, 60 * 60);
 
-    //*===============>  SENDING COOKIE
     res.cookie("sessionID", sessionID, {
       httpOnly: true,
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
@@ -102,52 +83,44 @@ export const loginUser = async (req, res) => {
       maxAge: 60 * 60 * 1000,
     });
 
-    return customResp(res, 200, userLoginSuccess);
+    return customResp(res, 200, "User login successful");
   } catch (error) {
-    console.log(`User login failure:${error}`);
-    return customErr(res, 500, "Internal Server Error: User login failure");
+    console.error("User login failed:", error);
+    const errStr = "Internal Server Error: User login failed";
+    return customErr(res, 500, errStr);
   }
 };
 
-//*===============>  GET USER DETAILS
+//*===============>  GET USER DETAILS (SHOULD RE-EDIT)
 export const getUserDetails = async (req, res) => {
   try {
     const { name, email, picture, maxStorageInBytes, rootID } = req.user;
-    let rootDir;
-    try {
-      rootDir = await DirectoryModel.findById(rootID);
-    } catch (error) {
-      console.log(`Error_59:${error}`);
-      return customErr(res, 500, INS);
-    }
+    const rootDir = await DirectoryModel.findById(rootID);
+
     const usedStorageInBytes = rootDir.size;
     return res
       .status(200)
       .json({ name, email, picture, usedStorageInBytes, maxStorageInBytes });
   } catch (error) {
-    console.log(`Error_60:${error}`);
-    return customErr(res, 500, INS);
+    console.error("Fetching user details failed:", error);
+    const errStr = "Internal Server Error: Fetching user details failed";
+    return customErr(res, 500, errStr);
   }
 };
 
 //*===============>  USER LOGOUT
 export const logoutUser = async (req, res) => {
   try {
-    //*===============>  DELETING THE SESSION CREATED DUE TO LOGIN
     const { sessionID } = req.signedCookies;
-    try {
-      const redisKey = `session:${sessionID}`;
-      await redisClient.del(redisKey);
-    } catch (error) {
-      console.log(`Error_61:${error}`);
-      return customErr(res, 500, INS);
-    }
-    //*===============>  CLEARING COOKIE
+
+    const redisKey = `session:${sessionID}`;
+    await redisClient.del(redisKey);
+
     res.clearCookie("sessionID");
-    //*===============>  Status 204 : DOES NOT SUPPORT VALUES
     return res.status(204).end();
   } catch (error) {
-    console.log(`Error_62:${error}`);
-    return customErr(res, 500, INS);
+    console.error("User logout failed:", error);
+    const errStr = "Internal Server Error: User logout failed";
+    return customErr(res, 500, errStr);
   }
 };

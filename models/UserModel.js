@@ -5,13 +5,13 @@ const userSchema = new Schema(
   {
     name: {
       type: String,
-      required: [true, "Name field is required !"],
-      minLength: [3, "User name must be minimum of 4 characters !"],
+      required: [true, "Name field is required"],
+      minLength: [3, "User name must be minimum of 4 characters"],
       trim: true,
     },
     email: {
       type: String,
-      required: [true, "Email field is required !"],
+      required: [true, "Email field is required"],
       unique: true,
       match: [
         /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}$/,

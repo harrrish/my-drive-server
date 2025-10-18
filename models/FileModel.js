@@ -18,12 +18,12 @@ const fileSchema = new Schema(
     },
     userID: {
       type: Schema.Types.ObjectId,
-      required: [true, "userID is not mentioned !"],
+      required: [true, "userID is not mentioned"],
       ref: "User",
     },
     folderID: {
       type: Schema.Types.ObjectId,
-      required: [true, "Parent Directory ID is not mentioned !"],
+      required: [true, "Parent Directory ID is not mentioned"],
       ref: "Directory",
     },
     path: {

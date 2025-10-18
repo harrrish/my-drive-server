@@ -1,5 +1,5 @@
 import DirectoryModel from "../models/DirectoryModel.js";
-import { customErr, INS } from "./customReturn.js";
+import { customErr } from "./customReturn.js";
 
 export const editFolderSize = async (res, parentFolder, size, type) => {
   while (parentFolder !== null) {
@@ -20,7 +20,7 @@ export const editFolderSize = async (res, parentFolder, size, type) => {
       return customErr(
         res,
         500,
-        "Internal Server Error: Failed to edit folder size !"
+        "Internal Server Error: Failed to edit folder size"
       );
     }
   }

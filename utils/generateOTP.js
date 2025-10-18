@@ -34,8 +34,8 @@ export async function sendOTP(email) {
     // console.log("OTP sent: %s", info.messageId);
     return true;
   } catch (error) {
-    console.error("OTP generation failure:", error);
-    const errStr = "Internal Server Error: OTP generation failure";
+    console.error("OTP generation failed:", error);
+    const errStr = "Internal Server Error: OTP generation failed";
     return customErr(res, 500, errStr);
   }
 }

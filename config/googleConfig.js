@@ -2,9 +2,7 @@ import { OAuth2Client } from "google-auth-library";
 
 const clientId = process.env.GOOGLE_CLIENT_ID;
 
-const client = new OAuth2Client({
-  clientId,
-});
+const client = new OAuth2Client(clientId);
 
 export async function verifyToken(idToken) {
   try {
@@ -14,7 +12,11 @@ export async function verifyToken(idToken) {
     });
     const userData = loginTicket.getPayload();
     return userData;
-  } catch (googleClientConnectionErr) {
-    console.log({ googleClientConnectionErr });
+  } catch (error) {
+    console.error("Google token verification failed:", error);
+    return {
+      success: false,
+      error: "Invalid or expired Google ID token",
+    };
   }
 }

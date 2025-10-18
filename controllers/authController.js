@@ -47,103 +47,72 @@ export const loginWithGoogle = async (req, res) => {
     const { idToken } = req.body;
     const userData = await verifyToken(idToken);
     const { name, picture, email, sub } = userData;
-    let user;
-    try {
-      user = await UserModel.findOne({ email }).select("-__v").lean();
-    } catch (error) {
-      console.log(`Error_67:${error}`);
-      return customErr(res, 500, INS);
-    }
-    //*===============>  For newUser
+    const user = await UserModel.findOne({ email }).select("-__v").lean();
+
     if (!user) {
       const mongooseSession = await mongoose.startSession();
-      try {
-        mongooseSession.startTransaction();
-        const rootID = new Types.ObjectId();
-        const userID = new Types.ObjectId();
-        await UserModel.insertOne(
-          {
-            _id: userID,
-            name,
-            email,
-            rootID,
-            picture,
-            sub,
-          },
-          { mongooseSession }
-        );
-        await DirectoryModel.insertOne(
-          {
-            _id: rootID,
-            name: `root-${email}`,
-            parentFID: null,
-            userID,
-            path: rootID,
-          },
-          { mongooseSession }
-        );
-        //*===============>  SESSION CREATION
-        const sessionID = new Types.ObjectId();
-        //*===============>  SESSION CREATION
-        try {
-          const redisKey = `session:${sessionID}`;
-          await redisClient.json.set(redisKey, "$", {
-            userID: user._id,
-          });
-          await redisClient.expire(redisKey, 60 * 60);
-        } catch (error) {
-          console.log(`Error_75:${error}`);
-          return customErr(res, 500, INS);
-        }
 
-        //*===============>  SENDING COOKIE
-        res.cookie("sessionID", sessionID, {
-          httpOnly: true,
-          sameSite: "none",
-          secure: true, // false for development
-          signed: true,
-          maxAge: 60 * 60 * 1000,
-        });
-        mongooseSession.commitTransaction();
-        return customResp(res, 201, userLoginSuccess);
-      } catch (error) {
-        console.log(`Error_68:${error}`);
-        return customErr(res, 500, INS);
-      }
-    } else if (user.isDeleted) return customErr(res, 403, userDeleted);
-    else {
-      /*       let allSessions;
-      try {
-      } catch (error) {
-        console.log(`Error_69:${error}`);
-        return customErr(res, 500, INS);
-      }
-      if (allSessions && allSessions.length >= 2) {
-        await allSessions[0].deleteOne();
-      } */
+      mongooseSession.startTransaction();
+      const rootID = new Types.ObjectId();
+      const userID = new Types.ObjectId();
+      await UserModel.insertOne(
+        {
+          _id: userID,
+          name,
+          email,
+          rootID,
+          picture,
+          sub,
+        },
+        { mongooseSession }
+      );
+      await DirectoryModel.insertOne(
+        {
+          _id: rootID,
+          name: `root-${email}`,
+          parentFID: null,
+          userID,
+          path: rootID,
+        },
+        { mongooseSession }
+      );
       const sessionID = new Types.ObjectId();
-      //*===============>  SESSION CREATION
-      try {
-        const redisKey = `session:${sessionID}`;
-        await redisClient.json.set(redisKey, "$", {
-          userID: user._id,
-        });
-        await redisClient.expire(redisKey, 60 * 60);
-      } catch (error) {
-        console.log(`Error_70:${error}`);
-        return customErr(res, 500, INS);
-      }
-      //*===============>  SENDING COOKIE
+
+      const redisKey = `session:${sessionID}`;
+      await redisClient.json.set(redisKey, "$", {
+        userID: user._id,
+      });
+      await redisClient.expire(redisKey, 60 * 60);
+
+      res.cookie("sessionID", sessionID, {
+        httpOnly: true,
+        sameSite: "none",
+        secure: true, // false for development
+        signed: true,
+        maxAge: 60 * 60 * 1000,
+      });
+      mongooseSession.commitTransaction();
+      return customResp(res, 201, "User signup complete");
+    } else {
+      const sessionID = new Types.ObjectId();
+
+      const redisKey = `session:${sessionID}`;
+      await redisClient.json.set(redisKey, "$", {
+        userID: user._id,
+      });
+      await redisClient.expire(redisKey, 60 * 60);
+
       res.cookie("sessionID", sessionID, {
         httpOnly: true,
         sameSite: "Lax",
         signed: true,
         maxAge: 60 * 60 * 1000,
       });
-      return customResp(res, 201, userLoginSuccess);
+      return customResp(res, 201, "User login complete");
     }
   } catch (error) {
-    console.log(`Error_71:${error}`);
-    return customErr(res, 500, INS);
+    console.error("Login failed using Google:", error);
+    const errStr = "Internal Server Error: Login failed using Google";
+    return customErr(res, 500, errStr);
   }
 };

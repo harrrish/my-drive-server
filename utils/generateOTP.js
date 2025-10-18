@@ -4,6 +4,7 @@ import { Resend } from "resend";
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function sendOTP(email) {
+  // console.log(email) //* email is replaced by "haridir150@gmail.com" since Resend does not support other email ID's in free version.
   try {
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
 
@@ -20,8 +21,8 @@ export async function sendOTP(email) {
 
     const { data, error } = await resend.emails.send({
       from: "My Drive <onboarding@resend.dev>",
-      to: email,
-      subject: "My Drive OTP Verification",
+      to: "haridir150@gmail.com",
+      subject: "Resend: My Drive OTP Verification",
       html,
     });
 

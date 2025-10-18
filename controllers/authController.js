@@ -14,7 +14,7 @@ export const requestOTP = async (req, res) => {
 
   const { email } = data;
   const emailExists = await UserModel.findOne({ email });
-  if (emailExists) return customErr(res, 400, emailDuplicate);
+  if (emailExists) return customErr(res, 400, "Sorry, user email exists");
 
   const otpSent = await sendOTP(data.email);
   if (otpSent.success) {

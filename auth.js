@@ -1,6 +1,6 @@
 import { redisClient } from "./config/redisConfig.js";
 import UserModel from "./models/UserModel.js";
-import { customErr, errorSession, INS } from "./utils/customReturn.js";
+import { customErr } from "./utils/customReturn.js";
 import { validateMongoID } from "./utils/validateMongoID.js";
 
 export default async function checkAuth(req, res, next) {

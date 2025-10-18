@@ -9,16 +9,16 @@ import {
 
 const userRouter = express.Router();
 
-//* REGISTER USERS
+//*===============>  REGISTER USERS
 userRouter.post("/user/register", registerUser);
 
-//* LOGIN USER
+//*===============>  LOGIN USER
 userRouter.post("/user/login", loginUser);
 
-//* USER PROFILE
+//*===============>  USER PROFILE
 userRouter.get("/user/profile", checkAuth, getUserDetails);
 
-//* USER LOGOUT
+//*===============>  USER LOGOUT
 userRouter.post("/user/logout", checkAuth, logoutUser);
 
 export default userRouter;

@@ -78,7 +78,7 @@ export const deleteS3Files = async (keys) => {
     Bucket: "harisss-storage-app",
     Delete: {
       Objects: keys,
-      Quiet: false, //* set true to skip individual delete responses
+      Quiet: false, //*===============>  set true to skip individual delete responses
     },
   });
   // console.log({ deleteCommand: command });

@@ -16,8 +16,12 @@ export const editFolderSize = async (res, parentFolder, size, type) => {
       });
       parentFolder = newParentFolder;
     } catch (error) {
-      console.log(`Error_22:${error}`);
-      return customErr(res, 500, INS);
+      console.error("Failed to edit size:", error);
+      return customErr(
+        res,
+        500,
+        "Internal Server Error: Failed to edit folder size !"
+      );
     }
   }
 };

@@ -1,4 +1,4 @@
-//* SESSION's STORED TO REDIS
+//*===============>  SESSION's STORED TO REDIS
 import { model, Schema } from "mongoose";
 
 const sessionSchema = new Schema(

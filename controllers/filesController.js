@@ -23,7 +23,7 @@ import { validateMongoID } from "../utils/validateMongoID.js";
 import mime from "mime";
 import { editFolderSize } from "../utils/EditFolderSize.js";
 
-//* INITIATE FILE UPLOAD
+//*===============>  INITIATE FILE UPLOAD
 export const uploadInitiate = async (req, res) => {
   try {
     const filename = req.filename;
@@ -36,7 +36,7 @@ export const uploadInitiate = async (req, res) => {
 
     let insertedFile;
     try {
-      //* Creating the file data in MongoDB
+      //*===============>  Creating the file data in MongoDB
       insertedFile = await FileModel.create({
         extension,
         name: filename,
@@ -55,7 +55,7 @@ export const uploadInitiate = async (req, res) => {
     let uploadSignedUrl;
     try {
       const contentType = mime.getType(filename) || "application/octet-stream";
-      //* Generate pre-signed S3 upload URL
+      //*===============>  Generate pre-signed S3 upload URL
       uploadSignedUrl = await createUploadSignedUrl({
         key: `${insertedFile._id}${extension}`,
         contentType,
@@ -72,7 +72,7 @@ export const uploadInitiate = async (req, res) => {
   }
 };
 
-//* UPDATE FILE UPLOAD COMPLETE
+//*===============>  UPDATE FILE UPLOAD COMPLETE
 export const uploadComplete = async (req, res) => {
   try {
     const { _id: userID } = req.user;
@@ -155,7 +155,7 @@ export const uploadComplete = async (req, res) => {
   }
 };
 
-//* GET FILE CONTENT
+//*===============>  GET FILE CONTENT
 export const getFile = async (req, res) => {
   try {
     const { _id: userID } = req.user;
@@ -200,7 +200,7 @@ export const getFile = async (req, res) => {
   }
 };
 
-//* RENAME FILE
+//*===============>  RENAME FILE
 export const renameFile = async (req, res) => {
   try {
     const { _id: userID } = req.user;
@@ -232,7 +232,7 @@ export const renameFile = async (req, res) => {
   }
 };
 
-//* DELETE FILE
+//*===============>  DELETE FILE
 export const deleteFile = async (req, res) => {
   try {
     const { _id: userID } = req.user;
@@ -313,7 +313,7 @@ export const deleteFile = async (req, res) => {
   }
 };
 
-//* UPLOAD CANCEL
+//*===============>  UPLOAD CANCEL
 // export const uploadCancel = async (req, res) => {
 //   const { _id: userID } = req.user;
 //   const { fileID, size } = req.body;

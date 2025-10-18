@@ -8,16 +8,16 @@ import {
 
 const directoryRouter = express.Router();
 
-//* CREATING A NEW DIRECTORY
+//*===============>  CREATING A NEW DIRECTORY
 directoryRouter.post("{/:id}", createDirectory);
 
-//* GETTING FOLDERS & FILES
+//*===============>  GETTING FOLDERS & FILES
 directoryRouter.get("{/:id}", getDirectoryContents);
 
-//* RENAME A DIRECTORY
+//*===============>  RENAME A DIRECTORY
 directoryRouter.patch("/:id", renameDirectory);
 
-//* DELETE A DIRECTORY
+//*===============>  DELETE A DIRECTORY
 directoryRouter.delete("/:id", deleteDirectory);
 
 export default directoryRouter;

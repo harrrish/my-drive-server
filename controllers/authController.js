@@ -4,65 +4,41 @@ import UserModel from "../models/UserModel.js";
 import DirectoryModel from "../models/DirectoryModel.js";
 import { verifyToken } from "../config/googleConfig.js";
 import { sendOTP } from "../utils/generateOTP.js";
-import {
-  customErr,
-  customResp,
-  emailDuplicate,
-  INS,
-  invalidEmail,
-  invalidOTP,
-  missingCreds,
-  otpVerified,
-  userLoginSuccess,
-} from "../utils/customReturn.js";
 import { otpRequestSchema, otpVerifySchema } from "../zodModels/authSchema.js";
 import { redisClient } from "../config/redisConfig.js";
+import { customErr, customResp } from "../utils/customReturn.js";
 
 export const requestOTP = async (req, res) => {
   try {
     const { success, data, error } = otpRequestSchema.safeParse(req.body);
-    // console.log(data);
-    if (!success) {
-      console.log({ error: error.issues[0].message });
-      return customErr(res, 400, invalidEmail);
-    }
-    let emailExists;
-    try {
-      emailExists = await UserModel.findOne({ email: data.email });
-    } catch (error) {
-      console.log(`Error_63:${error}`);
-      return customErr(res, 500, INS);
-    }
+    if (!success) return customErr(res, 400, error.issues[0].message);
+
+    const { email } = data;
+    const emailExists = await UserModel.findOne({ email });
     if (emailExists) return customErr(res, 400, emailDuplicate);
 
     await sendOTP(data.email);
     return customResp(res, 201, `OTP sent to ${data.email} !`);
   } catch (error) {
-    console.log(`Error_64:${error}`);
-    return customErr(res, 500, INS);
+    console.error("OTP request failure:", error);
+    const errStr = "Internal Server Error: OTP request failure";
+    return customErr(res, 500, errStr);
   }
 };
 
 export const verifyOTP = async (req, res) => {
   try {
     const { success, data, error } = otpVerifySchema.safeParse(req.body);
-    if (!success) {
-      console.log({ error: error.issues[0].message });
-      return customErr(res, 400, missingCreds);
-    }
+    if (!success) return customErr(res, 400, "Invalid OTP or Credentials");
+
     const { email, otp } = data;
-    let otpRecord;
-    try {
-      otpRecord = await OTP.findOne({ email, otp });
-    } catch (error) {
-      console.log(`Error_65:${error}`);
-      return customErr(res, 500, INS);
-    }
+    const otpRecord = await OTP.findOne({ email, otp });
     if (!otpRecord) return customErr(res, 400, invalidOTP);
-    else return customResp(res, 200, otpVerified);
+    else return customResp(res, 200, "OTP verification completed");
   } catch (error) {
-    console.log(`Error_66:${error}`);
-    return customErr(res, 500, INS);
+    console.error("OTP verification failure:", error);
+    const errStr = "Internal Server Error: OTP verification failure";
+    return customErr(res, 500, errStr);
   }
 };
 
@@ -78,7 +54,7 @@ export const loginWithGoogle = async (req, res) => {
       console.log(`Error_67:${error}`);
       return customErr(res, 500, INS);
     }
-    //* For newUser
+    //*===============>  For newUser
     if (!user) {
       const mongooseSession = await mongoose.startSession();
       try {
@@ -106,9 +82,9 @@ export const loginWithGoogle = async (req, res) => {
           },
           { mongooseSession }
         );
-        //* SESSION CREATION
+        //*===============>  SESSION CREATION
         const sessionID = new Types.ObjectId();
-        //* SESSION CREATION
+        //*===============>  SESSION CREATION
         try {
           const redisKey = `session:${sessionID}`;
           await redisClient.json.set(redisKey, "$", {
@@ -120,7 +96,7 @@ export const loginWithGoogle = async (req, res) => {
           return customErr(res, 500, INS);
         }
 
-        //* SENDING COOKIE
+        //*===============>  SENDING COOKIE
         res.cookie("sessionID", sessionID, {
           httpOnly: true,
           sameSite: "none",
@@ -146,7 +122,7 @@ export const loginWithGoogle = async (req, res) => {
         await allSessions[0].deleteOne();
       } */
       const sessionID = new Types.ObjectId();
-      //* SESSION CREATION
+      //*===============>  SESSION CREATION
       try {
         const redisKey = `session:${sessionID}`;
         await redisClient.json.set(redisKey, "$", {
@@ -157,7 +133,7 @@ export const loginWithGoogle = async (req, res) => {
         console.log(`Error_70:${error}`);
         return customErr(res, 500, INS);
       }
-      //* SENDING COOKIE
+      //*===============>  SENDING COOKIE
       res.cookie("sessionID", sessionID, {
         httpOnly: true,
         sameSite: "Lax",

@@ -7,7 +7,7 @@ export async function deleteDirContents(
   filesList,
   foldersList
 ) {
-  //* S3 Deletes
+  //*===============>  S3 Deletes
   const s3Files = await FileModel.find({ folderID }, { _id: 1, extension: 1 });
   s3Deletes.push(
     ...s3Files.map(({ _id, extension }) => {
@@ -15,11 +15,11 @@ export async function deleteDirContents(
     })
   );
 
-  //* DB Files
+  //*===============>  DB Files
   const filesFound = await FileModel.find({ folderID }, { _id: 1 });
   filesList.push(...filesFound.map((file) => file._id));
 
-  //* DB Folders
+  //*===============>  DB Folders
   const foldersFound = await DirectoryModel.find(
     {
       parentFID: folderID,
@@ -28,7 +28,7 @@ export async function deleteDirContents(
   );
   foldersList.push(...foldersFound.map((folder) => folder._id));
 
-  //* Recursion
+  //*===============>  Recursion
   for (const { _id } of foldersFound) {
     // console.log(_id);
     await deleteDirContents(_id, s3Deletes, filesList, foldersList);

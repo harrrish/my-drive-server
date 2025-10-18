@@ -1,6 +1,6 @@
 import * as z from "zod";
 
-//* OTP SCHEMA
+//*===============>  OTP SCHEMA
 export const otpRequestSchema = z.object({
   email: z
     .email("Please provide a valid email !")
@@ -8,7 +8,7 @@ export const otpRequestSchema = z.object({
     .min(1, "Please provide a valid email !"),
 });
 
-//* OTP SCHEMA
+//*===============>  OTP SCHEMA
 export const otpVerifySchema = z.object({
   email: z
     .email("Please provide a valid email !")
@@ -21,13 +21,13 @@ export const otpVerifySchema = z.object({
     .regex(/^\d{4}$/, "Invalid OTP !"),
 });
 
-//* REGISTER SCHEMA
+//*===============>  REGISTER SCHEMA
 export const registerSchema = z.object({
   name: z
     .string("Please provide a valid name !")
     .trim()
     .min(3, "Name must be at least 3 characters !"),
-  email: z.string().email("Please provide a valid email !").trim(),
+  email: z.email("Please provide a valid email !").trim(),
   otp: z
     .string("Invalid OTP !")
     .trim()
@@ -40,7 +40,7 @@ export const registerSchema = z.object({
     .min(8, "Password must be at least 8 characters !"),
 });
 
-//* LOGIN SCHEMA
+//*===============>  LOGIN SCHEMA
 export const loginSchema = z.object({
   email: z
     .email("Please provide a valid email !")
@@ -52,7 +52,7 @@ export const loginSchema = z.object({
     .min(1, "Please provide a valid password !"),
 });
 
-//* FOLDER SCHEMA
+//*===============>  FOLDER SCHEMA
 export const folderSchema = z.object({
   folderName: z
     .string("Please provide a valid folder name !")

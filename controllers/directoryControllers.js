@@ -15,17 +15,17 @@ import { validateMongoID } from "../utils/validateMongoID.js";
 import { deleteS3Files } from "../config/s3.js";
 import { editFolderSize } from "../utils/EditFolderSize.js";
 
-//* GET DIRECTORY ITEMS
+//*===============>  GET DIRECTORY ITEMS
 export const getDirectoryContents = async (req, res, next) => {
   try {
-    //* user ID and root ID
+    //*===============>  user ID and root ID
     const { id: userID, rootID } = req.user;
 
-    //* Fetching current folder ID
+    //*===============>  Fetching current folder ID
     const folderID = req.params.id;
     let currentDirID = folderID ? folderID : rootID;
 
-    //* Checking if the req params has a valid mongoID
+    //*===============>  Checking if the req params has a valid mongoID
     if (currentDirID !== folderID) validateMongoID(res, currentDirID);
 
     let currentFolder;
@@ -38,10 +38,10 @@ export const getDirectoryContents = async (req, res, next) => {
       console.log(`Error_29:${error}`);
       return customErr(res, 500, INS);
     }
-    //* If current directory not found
+    //*===============>  If current directory not found
     if (!currentFolder) return customErr(res, 404, dirErr);
 
-    //* Getting count of files, folder and path from the parent folder
+    //*===============>  Getting count of files, folder and path from the parent folder
     const { filesCount, foldersCount, path } = currentFolder;
     let pathData;
     if (path.length > 0) {
@@ -58,7 +58,7 @@ export const getDirectoryContents = async (req, res, next) => {
       );
     }
 
-    //* Getting the folders list from the parent directory
+    //*===============>  Getting the folders list from the parent directory
     let directories;
     try {
       directories = await DirectoryModel.find({
@@ -70,7 +70,7 @@ export const getDirectoryContents = async (req, res, next) => {
       return customErr(res, 500, INS);
     }
 
-    //* Getting the files list from the parent directory
+    //*===============>  Getting the files list from the parent directory
     let files;
     try {
       files = await FileModel.find({
@@ -106,21 +106,21 @@ export const getDirectoryContents = async (req, res, next) => {
   }
 };
 
-//* CREATE A DIRECTORY
+//*===============>  CREATE A DIRECTORY
 export const createDirectory = async (req, res, next) => {
   try {
-    //* user ID and root ID
+    //*===============>  user ID and root ID
     const { id: userID, rootID } = req.user;
 
-    //* Fetching current folder ID
+    //*===============>  Fetching current folder ID
     const folderID = req.params.id;
     let currentDirID = folderID ? folderID : rootID;
 
-    //* Checking if the req params has a valid mongoID
+    //*===============>  Checking if the req params has a valid mongoID
     if (rootID.toString() !== currentDirID.toString())
       validateMongoID(res, currentDirID);
 
-    //* Fetching folder name from request body
+    //*===============>  Fetching folder name from request body
     const { success, data, error } = folderSchema.safeParse(req.body);
     if (!success) {
       // console.log({ error: error.issues[0].message });
@@ -129,7 +129,7 @@ export const createDirectory = async (req, res, next) => {
 
     const { folderName } = data;
 
-    //* Checking if parent folder exists to create folder.
+    //*===============>  Checking if parent folder exists to create folder.
     let parentDir;
     try {
       parentDir = await DirectoryModel.findOne({
@@ -146,7 +146,7 @@ export const createDirectory = async (req, res, next) => {
       return customErr(res, 401, errorSession);
     }
 
-    //* Creating the folder
+    //*===============>  Creating the folder
     let createdDir;
     try {
       createdDir = await DirectoryModel.create({
@@ -160,7 +160,7 @@ export const createDirectory = async (req, res, next) => {
       return customErr(res, 500, INS);
     }
 
-    //* Updating the path of the new folder
+    //*===============>  Updating the path of the new folder
     try {
       createdDir.path.push(createdDir.id);
       await createdDir.save();
@@ -169,7 +169,7 @@ export const createDirectory = async (req, res, next) => {
       return customErr(res, 500, INS);
     }
 
-    //* Increasing folder count in parent folder
+    //*===============>  Increasing folder count in parent folder
     try {
       parentDir.foldersCount += 1;
       await parentDir.save();
@@ -185,23 +185,23 @@ export const createDirectory = async (req, res, next) => {
   }
 };
 
-//* RENAME DIRECTORY
+//*===============>  RENAME DIRECTORY
 export const renameDirectory = async (req, res, next) => {
   try {
-    //* user ID
+    //*===============>  user ID
     const { id: userID } = req.user;
     const folderID = req.params.id;
 
-    //* Checking if a non-empty param id
+    //*===============>  Checking if a non-empty param id
     if (!folderID) {
       res.clearCookie("sessionID");
       return customErr(res, 401, errorSession);
     }
 
-    //* Validating folderID from the user
+    //*===============>  Validating folderID from the user
     validateMongoID(res, folderID);
 
-    //* Finding the folder
+    //*===============>  Finding the folder
     let directoryData;
     try {
       directoryData = await DirectoryModel.findOne({ _id: folderID, userID });
@@ -215,7 +215,7 @@ export const renameDirectory = async (req, res, next) => {
       return customErr(res, 401, errorSession);
     }
 
-    //* Fetching the new folder name
+    //*===============>  Fetching the new folder name
     const { success, data, error } = folderSchema.safeParse(req.body);
     if (!success) {
       // console.log(error.issues[0].message);
@@ -223,7 +223,7 @@ export const renameDirectory = async (req, res, next) => {
     }
     const { folderName } = data;
 
-    //* Updating the folder name
+    //*===============>  Updating the folder name
     try {
       await DirectoryModel.updateOne(
         { _id: folderID, userID },
@@ -242,22 +242,22 @@ export const renameDirectory = async (req, res, next) => {
   }
 };
 
-//* DELETE DIRECTORY
+//*===============>  DELETE DIRECTORY
 export const deleteDirectory = async (req, res, next) => {
   try {
-    //* Get directoryID from the user
+    //*===============>  Get directoryID from the user
     const folderID = req.params.id;
 
-    //* Checking if a non-empty param id
+    //*===============>  Checking if a non-empty param id
     if (!folderID) {
       res.clearCookie("sessionID");
       return customErr(res, 401, errorSession);
     }
 
-    //* Validate the ID
+    //*===============>  Validate the ID
     validateMongoID(res, folderID);
 
-    //* Checking the folder exists
+    //*===============>  Checking the folder exists
     let folder;
     try {
       folder = await DirectoryModel.findById(folderID);
@@ -273,7 +273,7 @@ export const deleteDirectory = async (req, res, next) => {
 
     const { _id, parentFID } = folder;
 
-    //* Finding the parent folder to reduce folder count
+    //*===============>  Finding the parent folder to reduce folder count
     let parentFolder;
     try {
       parentFolder = await DirectoryModel.findById(parentFID);
@@ -287,7 +287,7 @@ export const deleteDirectory = async (req, res, next) => {
       return customErr(res, 401, errorSession);
     }
 
-    //* Reducing the folder count
+    //*===============>  Reducing the folder count
     try {
       parentFolder.foldersCount -= 1;
       await parentFolder.save();
@@ -296,7 +296,7 @@ export const deleteDirectory = async (req, res, next) => {
       return customErr(res, 500, INS);
     }
 
-    //* Delete folder contents
+    //*===============>  Delete folder contents
     const s3Deletes = [];
     const innerFiles = [];
     const innerFolders = [];
@@ -309,7 +309,7 @@ export const deleteDirectory = async (req, res, next) => {
       return customErr(res, 500, INS);
     }
 
-    //* Running the S3 delete only if there are files
+    //*===============>  Running the S3 delete only if there are files
     if (s3Deletes.length > 0) {
       try {
         await deleteS3Files(s3Deletes);
@@ -319,7 +319,7 @@ export const deleteDirectory = async (req, res, next) => {
       }
     }
 
-    //* Deleting all folders and files in DB
+    //*===============>  Deleting all folders and files in DB
     try {
       await Promise.all([
         DirectoryModel.deleteMany({ _id: { $in: innerFolders } }),

@@ -11,37 +11,31 @@ import {
 
 export const checkFileSize = async (req, res, next) => {
   try {
-    //* user ID, root ID
+    //*===============>  user ID, root ID
     const { id, rootID } = req.user;
 
-    //* Getting name, size and folderID from user.
+    //*===============>  Getting name, size and folderID from user.
     const { name, size, folderId: folderID } = req.body;
     if (!name || !size) {
       return customErr(res, 400, fileDetailsErr);
     }
     const currentDirID = folderID ? folderID : rootID;
 
-    //* Checking if the req body has a valid mongoID
+    //*===============>  Checking if the req body has a valid mongoID
     if (rootID.toString() !== currentDirID.toString()) {
       validateMongoID(res, currentDirID);
     }
 
-    //* Finding the current directory of user
-    let currentDir;
-    try {
-      currentDir = await DirectoryModel.findOne({
-        _id: currentDirID,
-        userID: id,
-      });
-    } catch (error) {
-      console.log(`Error_04:${error}`);
-      return customErr(res, 500, INS);
-    }
+    //*===============>  Finding the current directory of user
+    const currentDir = await DirectoryModel.findOne({
+      _id: currentDirID,
+      userID: id,
+    });
     if (!currentDir) {
       return customErr(res, 404, dirErr);
     }
 
-    //* Getting user data
+    //*===============>  Getting user data
     let reqUser;
     try {
       reqUser = await UserModel.findById(id);
@@ -50,7 +44,7 @@ export const checkFileSize = async (req, res, next) => {
       return customErr(res, 500, INS);
     }
 
-    //* Getting root directory
+    //*===============>  Getting root directory
     let rootDir;
     try {
       rootDir = await DirectoryModel.findById(rootID);
@@ -63,7 +57,7 @@ export const checkFileSize = async (req, res, next) => {
       return customErr(res, 401, userRootDirError);
     }
 
-    //* Checking the space left to upload the file
+    //*===============>  Checking the space left to upload the file
     const remainingSpace = reqUser.maxStorageInBytes - rootDir.size;
 
     if (size > remainingSpace) {
@@ -71,7 +65,7 @@ export const checkFileSize = async (req, res, next) => {
       return res.destroy();
     }
 
-    //* Attaching necessary info to request
+    //*===============>  Attaching necessary info to request
     req.filename = name;
     req.filesize = size;
     req.userID = id;

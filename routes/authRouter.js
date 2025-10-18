@@ -7,13 +7,13 @@ import {
 
 const authRouter = express.Router();
 
-//* SENDING OTP
+//*===============>  SENDING OTP
 authRouter.post("/send-otp", requestOTP);
 
-//* VERIFYING OTP
+//*===============>  VERIFYING OTP
 authRouter.post("/verify-otp", verifyOTP);
 
-//* GOOGLE AUTH
+//*===============>  GOOGLE AUTH
 authRouter.post("/google", loginWithGoogle);
 
 export default authRouter;

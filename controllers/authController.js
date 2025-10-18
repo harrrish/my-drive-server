@@ -17,8 +17,12 @@ export const requestOTP = async (req, res) => {
     const emailExists = await UserModel.findOne({ email });
     if (emailExists) return customErr(res, 400, emailDuplicate);
 
-    await sendOTP(data.email);
-    return customResp(res, 201, `OTP sent to ${data.email} !`);
+    const otpSent = await sendOTP(data.email);
+    if (otpSent) {
+      return customResp(res, 201, `OTP sent to ${data.email} !`);
+    } else {
+      return customErr(res, 500, "Unable to generate");
+    }
   } catch (error) {
     console.error("OTP request failed:", error);
     const errStr = "Internal Server Error: OTP request failed";

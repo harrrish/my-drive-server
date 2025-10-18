@@ -39,10 +39,11 @@ export async function sendOTP(email) {
   try {
     info = await transporter.sendMail({
       from: `Harish S <haridir150@gmail.com>`,
-      to: "haridir150@gmail.com",
+      to: `${email}`,
       subject: "OTP Verification",
       html,
     });
+    return true;
   } catch (error) {
     console.log(`Error_74:${error}`);
     return customErr(res, 500, INS);

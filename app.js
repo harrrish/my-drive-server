@@ -10,6 +10,8 @@ import authRouter from "./routes/authRouter.js";
 import checkAuth from "./auth.js";
 import { connectDB } from "./config/dbConfig.js";
 
+const PORT = process.env.PORT || 4000;
+
 //* Connecting to Database
 connectDB();
 
@@ -52,6 +54,6 @@ app.get("/test", (req, res) => {
   return res.send("Hello");
 });
 
-app.listen(process.env.PORT, () =>
+app.listen(PORT, () =>
   console.log(`Express app running on PORT:${process.env.PORT} `)
 );

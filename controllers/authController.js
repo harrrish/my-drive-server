@@ -10,7 +10,9 @@ import { customErr, customResp } from "../utils/customReturn.js";
 
 export const requestOTP = async (req, res) => {
   const { success, data, error } = otpRequestSchema.safeParse(req.body);
-  if (!success) return customErr(res, 400, error.issues[0].message);
+  // console.log({ success }, { data }, { error });
+
+  if (!success) return customErr(res, 400, "Invalid credentials");
 
   const { email } = data;
   const emailExists = await UserModel.findOne({ email });

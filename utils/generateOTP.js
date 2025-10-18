@@ -39,7 +39,6 @@ export async function sendOTP(email) {
       subject: "OTP Verification",
       html,
     });
-    // console.log({ info });
     // console.log("Email sent successfully:", info.messageId);
 
     return { success: true };

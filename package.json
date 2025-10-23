@@ -26,7 +26,7 @@
   "main": "app.js",
   "scripts": {
     "start": "node --env-file=.env app.js",
-    "dev": "node --watch --no-deprecation --env-file=.env app.js"
+    "dev": "node --watch --no-deprecation --env-file=.env.development app.js"
   },
   "keywords": [],
   "author": "",

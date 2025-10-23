@@ -10,11 +10,16 @@ import { connectDB } from "./config/dbConfig.js";
 
 connectDB();
 const PORT = process.env.PORT || 4000;
+const env = process.env.NODE_ENV;
+const url = process.env.URL;
+
 const app = express();
+
+console.log({ env }, { url });
 
 app.use(
   cors({
-    origin: "https://my-drive-client.onrender.com",
+    origin: url,
     credentials: true,
   })
 );

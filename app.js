@@ -15,8 +15,6 @@ const url = process.env.URL;
 
 const app = express();
 
-if (env === "development") console.log({ env }, { url });
-
 app.use(
   cors({
     origin: url,

@@ -17,7 +17,7 @@ export const otpVerifySchema = z.object({
   otp: z
     .string("Invalid OTP")
     .trim()
-    .length(4, "Invalid OTP ! ")
+    .length(4, "Invalid OTP")
     .regex(/^\d{4}$/, "Invalid OTP"),
 });
 

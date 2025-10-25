@@ -1,0 +1,240 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useMutation } from "@tanstack/react-query";
+import CompRegisterNav from "../components/CompRegisterNav";
+import CompError from "../components/CompError";
+import CompGoogleBtn from "../components/CompGoogleBtn";
+import CompRegisterToLogin from "../components/CompRegisterToLogin";
+import {
+  requestOTPFun,
+  verifyOTPFun,
+  userRegSubFun,
+} from "../utils/UserQueryFunctions";
+
+export default function PageUserRegister() {
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({
+    name: "Alpha Kumar",
+    email: "alpha@gmail.com",
+    password: "Qwerty@12345",
+    otp: "",
+  });
+  const [otpBox, setOtpBox] = useState(false);
+  const [timer, setTimer] = useState(null);
+  const [registerBtn, setRegisterBtn] = useState(false);
+  const [send, setSend] = useState("Send OTP");
+
+  //* ==========>HANDLING FORM CHANGE
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  //* ==========>SENDING OTP
+  const {
+    mutate: requestOTP,
+    isPending: requestOTPPending,
+    error: requestOTPError,
+    reset: requestOTPReset,
+  } = useMutation({
+    mutationFn: requestOTPFun,
+    onError: (error) => {
+      console.log(error.message);
+    },
+    onSuccess: () => {
+      setOtpBox(true);
+      setTimer(180);
+      const otpInterval = setInterval(() => {
+        setTimer((prevTimer) => {
+          const newTimer = prevTimer - 1;
+          if (newTimer <= 0) {
+            clearInterval(otpInterval);
+            verifyOTPReset();
+            setOtpBox(false);
+            setSend("Resend OTP");
+            return 0;
+          }
+          return newTimer;
+        });
+      }, 1000);
+    },
+  });
+
+  function requestOTP() {
+    
+  }
+
+  //* ==========>VERIFYING OTP
+  const {
+    mutate: verifyOTP,
+    isPending: verifyOTPPending,
+    error: verifyOTPError,
+    reset: verifyOTPReset,
+    isSuccess,
+  } = useMutation({
+    mutationFn: verifyOTPFun,
+    onError: (error) => {
+      console.log(error.message);
+    },
+    onSuccess: (data) => {
+      console.log(data);
+      setRegisterBtn(true);
+    },
+  });
+
+  //* ==========>SUBMITTING FORM
+  const {
+    mutate: userRegSub,
+    isPending: userRegSubPen,
+    error: userRegSubErr,
+    reset: userRegSubReset,
+  } = useMutation({
+    mutationFn: userRegSubFun,
+    onError: (error) => {
+      console.log(error.message);
+      if (error.message === "OTP expired or Invalid OTP !") {
+        setRegisterBtn(false);
+        setOtpBox(false);
+        setTimeout(() => verifyOTPReset(), 3000);
+      }
+    },
+    onSuccess: (data) => {
+      navigate("/login");
+      console.log(data);
+    },
+  });
+
+  useEffect(() => {
+    if (requestOTPError) setTimeout(() => requestOTPReset(), 3000);
+    if (verifyOTPError) setTimeout(() => verifyOTPReset(), 3000);
+    if (userRegSubErr) setTimeout(() => userRegSubReset(), 3000);
+  }, [
+    requestOTPError,
+    requestOTPReset,
+    verifyOTPError,
+    verifyOTPReset,
+    userRegSubErr,
+    userRegSubReset,
+  ]);
+
+  return (
+    <div className="bg-gray-200 min-h-[100vh] flex justify-center items-center font-body">
+      <div className="w-[90%] sm:max-w-md mx-auto p-6 shadow-lg flex flex-col gap-4 rounded-sm bg-clr1">
+        <CompRegisterNav />
+
+        <div className="flex flex-col gap-4 font-emb-display font-bold">
+          {/* //* ==========>FULL NAME */}
+          <div className="flex flex-col gap-1">
+            <label htmlFor="name" className="block text-sm">
+              Full Name
+            </label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              placeholder="User name"
+              className={`w-full px-3 py-2 border  shadow-sm focus:outline-blue-400`}
+            />
+          </div>
+          {/* //* ==========>EMAIL */}
+          <div className="flex flex-col gap-1">
+            <label htmlFor="email" className="text-sm">
+              Email
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              placeholder="Useremail@abc.com"
+              onChange={handleChange}
+              className={`w-full px-3 py-2 border  shadow-sm focus:outline-blue-400`}
+            />
+            {/* //* ==========>SENT OTP */}
+            {!otpBox && (
+              <button
+                onClick={() => requestOTP(formData.email)}
+                className="text-sm w-fit hover:underline cursor-pointer"
+              >
+                {requestOTPPending ? "Sending..." : send}
+              </button>
+            )}
+            <div className="">
+              {otpBox && (
+                <div>
+                  <input
+                    type="otp"
+                    id="otp"
+                    name="otp"
+                    value={formData.otp}
+                    onChange={handleChange}
+                    placeholder="****"
+                    className={`w-full px-3 py-2 border  shadow-sm focus:outline-blue-400`}
+                  />
+                  {/* //* ==========>VERIFY OTP */}
+                  <div className="flex justify-between my-1">
+                    <button
+                      onClick={() => verifyOTP(formData)}
+                      disabled={isSuccess}
+                      className="text-sm w-fit hover:underline cursor-pointer disabled:text-gray-400 disabled:cursor-not-allowed"
+                    >
+                      {isSuccess
+                        ? "OTP Verified !"
+                        : verifyOTPPending
+                        ? "Verifying..."
+                        : `Verify OTP (OTP valid for ${timer} seconds)`}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+          {/* //* ==========>PASSWORD */}
+          <div className="flex flex-col gap-1">
+            <label htmlFor="password" className="block text-sm">
+              Password
+            </label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={formData.password}
+              placeholder="********"
+              onChange={handleChange}
+              className={`w-full px-3 py-2 border  shadow-sm focus:outline-blue-400`}
+            />
+          </div>
+          {/* //* ==========>REGISTER BUTTON */}
+          <div>
+            <button
+              type="button"
+              onClick={() => userRegSub(formData)}
+              disabled={!registerBtn}
+              className={`w-full py-2 text-lg px-4 border font-emb-display font-bold tracking-wider cursor-pointer shadow-sm bg-clr5 text-clr1 focus:outline-none disabled:bg-gray-400 disabled:cursor-not-allowed`}
+            >
+              {userRegSubPen ? "Registering..." : "Register"}
+            </button>
+          </div>
+        </div>
+
+        {requestOTPError && <CompError error={requestOTPError.message} />}
+        {verifyOTPError && <CompError error={verifyOTPError.message} />}
+        {userRegSubErr && <CompError error={userRegSubErr.message} />}
+
+        <div className="flex flex-col gap-2 items-center">
+          <CompRegisterToLogin />
+
+          <h1 className="text-center">Or</h1>
+
+          <CompGoogleBtn />
+        </div>
+      </div>
+    </div>
+  );
+}

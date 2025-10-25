@@ -16,11 +16,11 @@ export const requestOTP = async (req, res) => {
 
   const { email } = data;
   const emailExists = await UserModel.findOne({ email });
-  if (emailExists) return customErr(res, 400, "Sorry, user email exists");
+  if (emailExists) return customErr(res, 400, "Sorry, User email exists");
 
   const otpSent = await sendOTP(data.email);
   if (otpSent.success) {
-    return customResp(res, 201, `OTP sent to ${data.email} !`);
+    return customResp(res, 201, `OTP sent to ${data.email}`);
   } else {
     return customErr(res, 500, otpSent.error);
   }
@@ -33,12 +33,12 @@ export const verifyOTP = async (req, res) => {
 
     const { email, otp } = data;
     const otpRecord = await OTP.findOne({ email, otp });
-    if (!otpRecord) return customErr(res, 400, invalidOTP);
+    if (!otpRecord) return customErr(res, 400, "Invalid Email or OTP");
     else return customResp(res, 200, "OTP verification completed");
   } catch (error) {
     console.error("OTP verification failed:", error);
     const errStr = "Internal Server Error: OTP verification failed";
-    return customErr(res, 500, errStr);
+    return customErr(res, 500, "OTP verification failed");
   }
 };
 
@@ -47,7 +47,7 @@ export const loginWithGoogle = async (req, res) => {
     const { idToken } = req.body;
     const userData = await verifyToken(idToken);
     const { name, picture, email, sub } = userData;
-    const user = await UserModel.findOne({ email }).select("-__v").lean();
+    const user = await UserModel.findOne({ email });
 
     if (!user) {
       const mongooseSession = await mongoose.startSession();
@@ -77,12 +77,19 @@ export const loginWithGoogle = async (req, res) => {
         { mongooseSession }
       );
       const sessionID = new Types.ObjectId();
-
-      const redisKey = `session:${sessionID}`;
-      await redisClient.json.set(redisKey, "$", {
+      const redisSessionKey = `session:${sessionID}`;
+      await redisClient.json.set(redisSessionKey, "$", {
         userID: user._id,
       });
-      await redisClient.expire(redisKey, 60 * 60);
+      await redisClient.expire(redisSessionKey, 60 * 60);
+
+      const redisUserDetails = `user:${userID}`;
+      const ab = await redisClient.json.set(redisUserDetails, "$", {
+        name: user.name,
+        email: user.email,
+        picture: user.picture,
+      });
+      await redisClient.expire(redisUserDetails, 60 * 60);
 
       res.cookie("sessionID", sessionID, {
         httpOnly: true,
@@ -101,6 +108,14 @@ export const loginWithGoogle = async (req, res) => {
         userID: user._id,
       });
       await redisClient.expire(redisKey, 60 * 60);
+
+      const redisUserDetails = `user:${user._id}`;
+      const ab = await redisClient.json.set(redisUserDetails, "$", {
+        name: user.name,
+        email: user.email,
+        picture: user.picture,
+      });
+      await redisClient.expire(redisUserDetails, 60 * 60);
 
       res.cookie("sessionID", sessionID, {
         httpOnly: true,

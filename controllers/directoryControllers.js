@@ -23,7 +23,7 @@ export const getDirectoryContents = async (req, res, next) => {
     if (!currentFolder)
       return customErr(res, 404, "Folder deleted or Access denied");
 
-    const directories = await DirectoryModel.find({
+    const folders = await DirectoryModel.find({
       userID,
       parentFID: currentDirID,
     });
@@ -44,17 +44,12 @@ export const getDirectoryContents = async (req, res, next) => {
         })
       );
     }
-
-    let rootFolderData = await DirectoryModel.findById(rootID);
-    const storageUsed = rootFolderData.size;
-
     return res.status(200).json({
-      directories,
+      folders,
       files,
       filesCount,
       foldersCount,
       path: pathData,
-      storageUsed,
     });
   } catch (error) {
     console.error("Failed to fetch folder content:", error);
@@ -95,7 +90,7 @@ export const createDirectory = async (req, res, next) => {
     parentDir.foldersCount += 1;
     await parentDir.save();
 
-    return customResp(res, 201, "Folder creation complete");
+    return customResp(res, 201, `Folder "${folderName}" created`);
   } catch (error) {
     console.error("Folder creation failed:", error);
     const errStr = "Internal Server Error: Folder creation failed";
@@ -114,25 +109,25 @@ export const renameDirectory = async (req, res, next) => {
     }
     validateMongoID(res, folderID);
 
-    const directoryData = await DirectoryModel.findOne({
-      _id: folderID,
-      userID,
-    });
-
     const { success, data, error } = folderSchema.safeParse(req.body);
     if (!success) return customErr(res, 400, error.issues[0].message);
 
     const { folderName } = data;
 
-    const { acknowledged } = await DirectoryModel.updateOne(
+    const renamed = await DirectoryModel.findOneAndUpdate(
       { _id: folderID, userID },
-      { $set: { name: folderName } },
-      { new: true }
+      { $set: { name: folderName } }
     );
-    if (!acknowledged) {
+    if (!renamed) {
       res.clearCookie("sessionID");
       return customErr(res, 400, "Folder deleted or Access denied");
-    } else return customResp(res, 201, "Folder rename completed");
+    } else {
+      return customResp(
+        res,
+        201,
+        `Folder renamed from "${renamed.name}" to "${folderName}"`
+      );
+    }
   } catch (error) {
     console.error("Folder rename failed:", error);
     const errStr = "Internal Server Error: Folder rename failed";
@@ -169,17 +164,18 @@ export const deleteDirectory = async (req, res, next) => {
     innerFolders.push(_id);
 
     await deleteDirContents(folderID, s3Deletes, innerFiles, innerFolders);
+    // console.log({ innerFiles }, { innerFolders });
 
     if (s3Deletes.length > 0) await deleteS3Files(s3Deletes);
 
     await Promise.all([
       DirectoryModel.deleteMany({ _id: { $in: innerFolders } }),
-      FileModel.deleteMany({ folderID: { $in: innerFiles } }),
+      FileModel.deleteMany({ _id: { $in: innerFiles } }),
     ]);
 
     editFolderSize(res, parentFolder, folder.size, "dec");
 
-    return customResp(res, 201, "Folder delete completed");
+    return customResp(res, 201, `Folder "${folder.name}" deleted`);
   } catch (error) {
     console.error("Folder deletion failed:", error);
     const errStr = "Internal Server Error: Folder deletion failed";

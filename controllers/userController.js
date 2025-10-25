@@ -14,9 +14,6 @@ export const registerUser = async (req, res) => {
 
     const { name, email, password, otp } = data;
 
-    const emailCopy = await UserModel.findOne({ email }).lean();
-    if (emailCopy) return customErr(res, 400, "Sorry, User email exists");
-
     const otpRecord = await OTPModel.findOne({ email, otp });
     if (!otpRecord) return customErr(res, 400, "Invalid or Expired OTP");
     await otpRecord.deleteOne();
@@ -69,11 +66,19 @@ export const loginUser = async (req, res) => {
     if (!isPasswordValid) return customErr(res, 400, "Invalid Credentials");
 
     const sessionID = new Types.ObjectId();
-    const redisKey = `session:${sessionID}`;
-    await redisClient.json.set(redisKey, "$", {
+    const redisSessionKey = `session:${sessionID}`;
+    await redisClient.json.set(redisSessionKey, "$", {
       userID: user._id,
     });
-    await redisClient.expire(redisKey, 60 * 60);
+    await redisClient.expire(redisSessionKey, 60 * 60);
+
+    const redisUserDetails = `user:${user.id}`;
+    await redisClient.json.set(redisUserDetails, "$", {
+      name: user.name,
+      email: user.email,
+      picture: user.picture,
+    });
+    await redisClient.expire(redisUserDetails, 60 * 60);
 
     res.cookie("sessionID", sessionID, {
       httpOnly: true,
@@ -91,16 +96,31 @@ export const loginUser = async (req, res) => {
   }
 };
 
-//*===============>  GET USER DETAILS (SHOULD RE-EDIT)
+//*===============>  GET USER PROFILE DETAILS
 export const getUserDetails = async (req, res) => {
-  try {
-    const { name, email, picture, maxStorageInBytes, rootID } = req.user;
-    const rootDir = await DirectoryModel.findById(rootID);
+  const redisKey = `user:${req.user.id}`;
+  const redisData = await redisClient.json.get(redisKey);
+  if (redisData) {
+    const { name, email, picture } = redisData;
+    return res.status(200).json({ name, email, picture });
+  } else {
+    try {
+      const { name, email, picture } = req.user;
+      return res.status(200).json({ name, email, picture });
+    } catch (error) {
+      console.error("Fetching user details failed:", error);
+      const errStr = "Internal Server Error: Fetching user details failed";
+      return customErr(res, 500, errStr);
+    }
+  }
+};
 
-    const usedStorageInBytes = rootDir.size;
-    return res
-      .status(200)
-      .json({ name, email, picture, usedStorageInBytes, maxStorageInBytes });
+//*===============>  GET USER STORAGE DETAILS
+export const getUserStorage = async (req, res) => {
+  try {
+    const { rootID, maxStorageInBytes } = req.user;
+    const { size } = await DirectoryModel.findById(rootID).select("size -_id");
+    return res.status(200).json({ maxStorageInBytes, size });
   } catch (error) {
     console.error("Fetching user details failed:", error);
     const errStr = "Internal Server Error: Fetching user details failed";
@@ -112,9 +132,10 @@ export const getUserDetails = async (req, res) => {
 export const logoutUser = async (req, res) => {
   try {
     const { sessionID } = req.signedCookies;
-
     const redisKey = `session:${sessionID}`;
     await redisClient.del(redisKey);
+    const redisUserDetailsKey = `user:${req.user.id}`;
+    await redisClient.del(redisUserDetailsKey);
 
     res.clearCookie("sessionID");
     return res.status(204).end();

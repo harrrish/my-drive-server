@@ -83,7 +83,7 @@ export const uploadComplete = async (req, res) => {
     await parentFolder.save();
     editFolderSize(res, parentFolder, size, "inc");
 
-    return customResp(res, 200, "File upload complete");
+    return customResp(res, 200, `File "${file.name}" upload complete`);
   } catch (error) {
     console.error("File upload failed:", error);
     const errStr = "Internal Server Error: File upload failed";
@@ -141,15 +141,20 @@ export const renameFile = async (req, res) => {
     const { newName, basename } = req.body;
     if (!basename.trim()) return customErr(res, 400, "Invalid file name");
 
-    const { acknowledged } = await FileModel.updateOne(
+    const renamed = await FileModel.findOneAndUpdate(
       { _id: fileID, userID },
       { $set: { name: newName, basename } }
     );
 
-    if (!acknowledged) {
+    if (!renamed) {
       res.clearCookie("sessionID");
       return customErr(res, 401, "File Deleted or Access Denied");
-    } else return customResp(res, 201, "File name updated");
+    } else
+      return customResp(
+        res,
+        201,
+        `File renamed from "${renamed.name}" to "${newName}"`
+      );
   } catch (error) {
     console.error("File rename failed:", error);
     const errStr = "Internal Server Error: File rename failed";
@@ -186,11 +191,11 @@ export const deleteFile = async (req, res) => {
       res.clearCookie("sessionID");
       return customErr(res, 401, "File Deleted or Access Denied");
     } else {
-      parentFolder = await DirectoryModel.findById(folderID);
+      const parentFolder = await DirectoryModel.findById(folderID);
       parentFolder.filesCount -= 1;
       await parentFolder.save();
       editFolderSize(res, parentFolder, size, "dec");
-      return customResp(res, 201, fileDeleteSuccess);
+      return customResp(res, 201, `File "${fileData.name}" deleted`);
     }
   } catch (error) {
     console.error("File deletion failed:", error);

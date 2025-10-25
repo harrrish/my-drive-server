@@ -1,11 +1,12 @@
 import UserModel from "../models/UserModel.js";
 import DirectoryModel from "../models/DirectoryModel.js";
 import { validateMongoID } from "../utils/validateMongoID.js";
+import { customErr } from "../utils/customReturn.js";
 
 export const checkFileSize = async (req, res, next) => {
   try {
     const { id, rootID } = req.user;
-    const { name, size, folderId: folderID } = req.body;
+    const { name, size, folderID } = req.body;
     if (!name || !size) return customErr(res, 400, "Invalid file details");
 
     const currentDirID = folderID ? folderID : rootID;

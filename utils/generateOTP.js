@@ -26,7 +26,7 @@ export async function sendOTP(email) {
       html,
     });
 
-    console.log(data, error);
+    // console.log(data, error);
 
     if (data.id) {
       return { success: true };

@@ -2,6 +2,7 @@ import express from "express";
 import checkAuth from "../auth.js";
 import {
   getUserDetails,
+  getUserStorage,
   loginUser,
   logoutUser,
   registerUser,
@@ -17,6 +18,9 @@ userRouter.post("/user/login", loginUser);
 
 //*===============>  USER PROFILE
 userRouter.get("/user/profile", checkAuth, getUserDetails);
+
+//*===============>  USER STORAGE
+userRouter.get("/user/storage-details", checkAuth, getUserStorage);
 
 //*===============>  USER LOGOUT
 userRouter.post("/user/logout", checkAuth, logoutUser);

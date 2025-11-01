@@ -25,7 +25,7 @@
   "version": "1.0.0",
   "main": "app.js",
   "scripts": {
-    "start": "node --env-file=.env app.js",
+    "start": "node app.js",
     "dev": "node --watch --no-deprecation --env-file=.env.development app.js"
   },
   "keywords": [],

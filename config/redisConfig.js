@@ -3,18 +3,13 @@ import { createClient } from "redis";
 const client = createClient({
   url: process.env.REDIS_URL,
   socket: {
-    reconnectStrategy: (retries) => Math.min(retries * 50, 500),
+    reconnectStrategy: (retries) => Math.min(retries * 50, 1000),
+    connectTimeout: 10000,
   },
 });
 
-client.on("error", (err) => {
-  if (err.code === "ENOTFOUND") {
-    console.warn("Redis DNS lookup failed, retrying...");
-  } else {
-    console.error("Redis error:", err);
-  }
-});
-client.on("connect", () => console.log("Redis Connection Success"));
+client.on("error", (err) => console.error("Redis connection error:", err));
+client.on("connect", () => console.log("Connected to Redis"));
 
 await client.connect();
 

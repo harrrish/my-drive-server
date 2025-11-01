@@ -24,7 +24,11 @@ app.use(
 app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(express.json());
 
-app.use("/", userRouter);
+app.get("/", (req, res) => {
+  return res.status(200).json({ message: "Welcome to My-Drive" });
+});
+
+app.use("/user", userRouter);
 app.use("/file", checkAuth, filesRouter);
 app.use("/directory", checkAuth, directoryRouter);
 app.use("/auth", authRouter);

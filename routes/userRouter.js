@@ -11,18 +11,18 @@ import {
 const userRouter = express.Router();
 
 //*===============>  REGISTER USERS
-userRouter.post("/user/register", registerUser);
+userRouter.post("/register", registerUser);
 
 //*===============>  LOGIN USER
-userRouter.post("/user/login", loginUser);
+userRouter.post("/login", loginUser);
 
 //*===============>  USER PROFILE
-userRouter.get("/user/profile", checkAuth, getUserDetails);
+userRouter.get("/profile", checkAuth, getUserDetails);
 
 //*===============>  USER STORAGE
-userRouter.get("/user/storage-details", checkAuth, getUserStorage);
+userRouter.get("/storage-details", checkAuth, getUserStorage);
 
 //*===============>  USER LOGOUT
-userRouter.post("/user/logout", checkAuth, logoutUser);
+userRouter.post("/logout", checkAuth, logoutUser);
 
 export default userRouter;

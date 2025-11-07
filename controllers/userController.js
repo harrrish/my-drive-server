@@ -138,6 +138,7 @@ export const logoutUser = async (req, res) => {
     await redisClient.del(redisUserDetailsKey);
 
     res.clearCookie("sessionID");
+    console.log("User logged out_9");
     return res.status(204).end();
   } catch (error) {
     console.error("User logout failed:", error);

@@ -5,6 +5,7 @@ import { customErr } from "../utils/customReturn.js";
 
 export const checkFileSize = async (req, res, next) => {
   try {
+    console.log(req.body);
     const { id, rootID } = req.user;
     const { name, size, folderID } = req.body;
     if (!name || !size) return customErr(res, 400, "Invalid file details");

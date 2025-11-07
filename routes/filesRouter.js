@@ -4,14 +4,14 @@ import {
   getFile,
   renameFile,
   uploadComplete,
+  uploadFileInitiate,
 } from "../controllers/filesController.js";
 import { checkFileSize } from "../middlewares/checkFileSizeMiddleware.js";
-import { uploadInitiate } from "../controllers/filesController.js";
 
 const filesRouter = express.Router();
 
 //*===============>  INITIATE FILE UPLOAD
-filesRouter.post("/upload/initiate", checkFileSize, uploadInitiate);
+filesRouter.post("/upload/initiate", checkFileSize, uploadFileInitiate);
 
 //*===============>  UPDATE FILE UPLOAD COMPLETE
 filesRouter.post("/upload/complete", uploadComplete);

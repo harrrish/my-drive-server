@@ -105,6 +105,7 @@ export const renameDirectory = async (req, res, next) => {
     const folderID = req.params.id;
     if (!folderID) {
       res.clearCookie("sessionID");
+      console.log("User logged out_4");
       return customErr(res, 401, "Invalid folder ID");
     }
     validateMongoID(res, folderID);
@@ -120,6 +121,7 @@ export const renameDirectory = async (req, res, next) => {
     );
     if (!renamed) {
       res.clearCookie("sessionID");
+      console.log("User logged out_5");
       return customErr(res, 400, "Folder deleted or Access denied");
     } else {
       return customResp(
@@ -141,6 +143,7 @@ export const deleteDirectory = async (req, res, next) => {
     const folderID = req.params.id;
     if (!folderID) {
       res.clearCookie("sessionID");
+      console.log("User logged out_6");
       return customErr(res, 401, "Invalid folder ID");
     }
     validateMongoID(res, folderID);
@@ -148,6 +151,7 @@ export const deleteDirectory = async (req, res, next) => {
     const folder = await DirectoryModel.findById(folderID);
     if (!folder) {
       res.clearCookie("sessionID");
+      console.log("User logged out_7");
       return customErr(res, 401, "Folder deleted or Access denied");
     }
 

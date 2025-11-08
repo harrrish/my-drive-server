@@ -30,7 +30,7 @@ export const registerUser = async (req, res) => {
         password,
         rootID,
       },
-      { session }
+      { session },
     );
     await DirectoryModel.insertOne(
       {
@@ -40,7 +40,7 @@ export const registerUser = async (req, res) => {
         userID,
         path: rootID,
       },
-      { session }
+      { session },
     );
     session.commitTransaction();
     return customResp(res, 201, "User registration complete");
@@ -70,7 +70,7 @@ export const loginUser = async (req, res) => {
     await redisClient.json.set(redisSessionKey, "$", {
       userID: user._id,
     });
-    await redisClient.expire(redisSessionKey, 60 * 60);
+    await redisClient.expire(redisSessionKey, 60 * 60 * 24);
 
     const redisUserDetails = `user:${user.id}`;
     await redisClient.json.set(redisUserDetails, "$", {
@@ -78,7 +78,7 @@ export const loginUser = async (req, res) => {
       email: user.email,
       picture: user.picture,
     });
-    await redisClient.expire(redisUserDetails, 60 * 60);
+    await redisClient.expire(redisUserDetails, 60 * 60 * 24);
 
     res.cookie("sessionID", sessionID, {
       httpOnly: true,
